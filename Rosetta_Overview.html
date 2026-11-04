@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- ####################################################################### -->
+<!-- #                    RRRRRR    EEEEEEEE  BBBBBBB                      # -->
+<!-- #                    RR   RR   EE        BB    BB                     # -->
+<!-- #                    RR    RR  EE        BB    BB                     # -->
+<!-- #                    RR   RR   EE        BB    BB                     # -->
+<!-- #                    RRRRRR    EEEEEE    BBBBBBB                      # -->
+<!-- #                    RR   RR   EE        BB    BB                     # -->
+<!-- #                    RR    RR  EE        BB    BB                     # -->
+<!-- #                    RR    RR  EE        BB    BB                     # -->
+<!-- #                    RR    RR  EEEEEEEE  BBBBBBB                      # -->
+<!-- # Rosetta                                                  # -->
+<!-- ####################################################################### -->
+<!-- This is the starting file opened.                                       -->
+<!--                                                                         -->
+<!-- File:                                                                   -->
+<!--    RoseEngineButler_Overview.html                                       -->
+<!--                                                                         -->
+<!-- Date:                                                                   -->
+<!--    1.1 - 30 Aug 2026, R. Colvin                                         -->
+<!--    1.0 - 05 Oct 2025, R. Colvin                                         -->
+<!--                                                                         -->
+<!-- Copyright (c) 2025 Colvin Tools and Brainwave Embedded.                 -->
+<!-- ####################################################################### -->
+
+<head>
+    <title>Rosetta</title>
+    <link rel="shortcut icon" type="image/ico" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="Images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+
+<body style="background-color: #E6E6E6; font: 16px Arial; ">
+
+<!-- ####################################################################### -->
+<!-- Code for Including Standard HTML files on the 	server                   -->
+<!-- ####################################################################### -->
+<script src="library.js"></script>
+
+<script>
+function includeHTML() {
+  var z, i, elmnt, file, xhttp;
+  /* Loop through a collection of all HTML elements: */
+  z = document.getElementsByTagName("*");
+  for (i = 0; i < z.length; i++) {
+    elmnt = z[i];
+    /*search for elements with a certain atrribute:*/
+    file = elmnt.getAttribute("w3-include-html");
+    if (file) {
+      /* Make an HTTP request using the attribute value as the file name: */
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+          if (this.status == 200) {elmnt.innerHTML = this.responseText;}
+          if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
+          /* Remove the attribute, and call this function once more: */
+          elmnt.removeAttribute("w3-include-html");
+          includeHTML();
+        }
+      }
+      xhttp.open("GET", file, true);
+      xhttp.send();
+      /* Exit the function: */
+      return;
+    }
+  }
+}
+</script> 
+
+<!-- ####################################################################### -->
+<!-- Standard horizontal rule definitions		  	                     	 -->
+<div w3-include-html="include-SiteStandards.html"></div> 
+<script>
+includeHTML();
+</script>
+
+<!-- ####################################################################### -->
+<!-- Header                                                                  -->
+<!-- ####################################################################### -->
+
+
+<table style="width: 100%; margin-bottom: 6px;">
+    <tr>
+        <td style="text-align: left; vertical-align: top; width: 60px;">
+            <a href="index.html"><IMG SRC="Images/Rosetta_6px.png" alt="no image file" style="width: 100%;" class="Image"></a>
+        </td>
+        <td style="text-align: left; vertical-align: top;">
+        	<p style="margin-top: 0px;"><span style="font-family: 'Libre Baskerville', serif; font-weight: bold; font-size: 36px;">Rosetta</span> <span style="font-weight: bold; font-size: 36px;">Overview</span>
+        </td>
+    </tr>
+</table>
+
+<hr style="border: 3px solid #191970; margin-top: 0; margin-bottom: 12px; " >
+
+<!-- ####################################################################### -->
+<!-- Body                                                                    -->
+<!-- ####################################################################### -->
+
+<p><span style="font-family: 'Libre Baskerville', serif; font-weight: bold;">Rosetta</span> was developed by ornamental turners for use with a rose engine.  
+
+<p>It is designed to provide the ornamental turner a way for synchronizing activities on the rose engine using stepper motors, in a manner which also assists the ornamental turner with reducing the workload for onerous tasks.
+
+<!-- 
+<p>It handles the automation needed for using stepper motors on the rose engine, and is based on <a href="https://linuxcnc.org" target="new">LinuxCNC</a>.
+-->
+
+<!-- ####################################################################### -->
+<!-- Design Goals                                                            -->
+<!-- ####################################################################### -->
+
+<h1 style="margin-bottom: 0;">Design goals</h1>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400" rel="stylesheet">
+<p style="margin-top: 0;">We want <span style="font-family: 'Libre Baskerville', serif; ">Rosetta</span> to provide the ornamental turner the ability to:
+
+	<ol>
+		<li style="margin-bottom: 12px; margin-top: 12px;">Execute relatively simple movement using menus.</li>
+		
+		<li style="margin-bottom: 12px;">Remove the mundane tasks from the ornamental turner&rsquo;s activities, increasing the likelihood that the final product will have fewer errors (e.g., adding a <a href="https://otbok.info/index.php?n=Main.ECFOnFlatSurfaces#toc-2" target="new">turk&rsquo;s head</a> design onto the end of a piece).</li>
+	
+		<li style="margin-bottom: 0;">Implement more complex designs using standard gCode (such as software simulation of geometric chucks).</li>
+	</ol>
+
+<hr class="style3">
+<p>We designed  <span style="font-family: 'Libre Baskerville', serif; ">Rosetta</span> to be one which:
+
+	<ol>
+		<li style="margin-bottom: 12px; margin-top: 12px;">Is powerful enough to drive simultaneous movement on multiple axes:
+			<ul>
+				<li>2 spindles
+					<ul>
+						<li>traditional spindle</li>
+						<li>rosette phaser/multipler</li>
+					</ul></li>
+				<li>traditional axes, which can be any selection of these:
+					<ul>
+						<li>linear axes:  X, Z, U, V, or W
+						<li>rotary axes:  A, B, or C
+					</ul></li>
+			</ul></li>
+		
+		<li style="margin-bottom: 12px;">Can control complex movement using standard gCode.</li>
+		
+		<li style="margin-bottom: 12px;">Is integrated with the devices provided by ornamental turning vendors.</li>
+		
+		<li style="margin-bottom: 0;">Can have the software upgraded easily by the user as new functionality is developed and become available.</li>
+	</ol>
+
+<!-- ####################################################################### -->
+<!-- Rosetta is More than the Software or the Hardware            -->
+<!-- ####################################################################### -->
+
+<hr class="style1">
+
+<h1 style="margin-bottom: 0;"><span style="font-family: 'Libre Baskerville', serif;">Rosetta</span> is more than the software or the hardware</h1>
+<p style="margin-top: 0;">The ornamental turner needs a system which is not just powerful, but which has a set of tools surrounding it to make it functionally easy to use.  To that end, there are additional pieces being provided.
+
+<h3 style="margin-bottom: 0;">Designed with the ornamental turner in mind</h3>
+<p style="margin-top: 0; margin-left: 25px;">The system configuration files are developed around the needs of an ornamental turner using a rose engine.
+
+<h3 style="margin-bottom: 0;">Online user manual</h3>
+<p style="margin-top: 0; margin-left: 25px;">There is an on-line user manual which will be continually updated.
+
+<div style="float: right; margin-left: 10px; margin-right: 0px; margin-bottom: 10px; width: 55px;  padding: 5px; border: 0px solid darkgray; text-align: left; margin-top: 0;">
+    <img src="Images/REB_SettingsGear.png" alt="no image file" style="width: 100%; "/></a>
+    <p class="TextSMImage"><i><b>Settings</b></i></p>    
+</div>
+<h3 style="margin-bottom: 0;">Very Easily Configured</h3>
+<p style="margin-top: 0; margin-left: 25px;">Typically, LinuxCNC is not easy to configure.  Additionally, it was not designed for reconfiguration based on changes to the system on a regular basis (as is done by an ornamental turner when using different devices).
+
+<p style="margin-top: 0; margin-left: 25px;">To make changes to the way <span style="font-family: 'Libre Baskerville', serif; ">Rosetta</span> works, there is a graphical interface accessible to the user.
+
+<div style="float: right; margin-left: 10px; margin-right: 0px; margin-bottom: 10px; width: 55px;  padding: 5px; border: 0px solid darkgray; text-align: left; margin-top: 0;">
+    <img src="Images/Rosetta_6px.png" alt="no image file" style="width: 100%; "/></a>
+    <p class="TextSMImage"><i><b>Turk&rsquo;s head</b></i></p>    
+</div>
+<h3 style="margin-bottom: 0;">Based on Debian Linux, but easy to use</h3>
+<p style="margin-top: 0; margin-left: 25px;">Though it is based on <a href="https://www.debian.org" target="new">Debian Linux</a>, the user interface has been customised so that the usage of the system will be very intuitive (you only need to double click on the turk&rsquo;s head picture on the desktop).
+
+<h3 style="margin-bottom: 0;">Supports very complex work using gCode</h3>
+<p style="margin-top: 0; margin-left: 25px;">LinuxCNC allows for the use of standard gCode.  The LinuxCNC gCode language is based on the <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=823374" target="new">RS274</a>/NGC language, and outlined in the International Organization for Standardization&rsquo;s standard, <a href="https://www.iso.org/standard/34608.html" target="new">ISO 6983-1</a>.
+        
+<p style="margin-left: 25px;">We are providing an online library for gCode programs developed by ornamental turners, allowing for re-use of the code by other ornamental turners.  The intent is that the gCode will be documented in such a way that users can easily take a bit of gCode and modify it as needed for their own needs.  This library will continue to grow over time.
+        
+<p style="margin-left: 25px;">There are also links to gCode manuals for quick reference.
+
+<h3 style="margin-bottom: 0;">OT equipment vendor support</h3>
+<p style="margin-top: 0; margin-left: 25px;">We are working with vendors of ornamental turning hardware to have their parts designed for use with <span style="font-family: 'Libre Baskerville', serif;">Rosetta</span>.  For example, a curvilinear slide could come with a stepper motor attached, and also have the necessary jack to plug it into <span style="font-family: 'Libre Baskerville', serif; ">Rosetta</span>.
+        
+<p style="margin-left: 25px;">We have also architected the configuration files so that updated files can be supplied by the vendors when they supply the hardware (e.g., a new definition for the Z axis could be supplied with the curvilinear slide, ensuring that the configuration works as expected).
+
+<div style="float: right; margin-left: 10px; margin-right: 0px; margin-bottom: 10px; width: 55px;  padding: 5px; border: 0px solid darkgray; text-align: left; margin-top: 0;">
+    <img src="Images/REB_Update.png" alt="no image file" style="width: 100%; "/></a>
+    <p class="TextSMImage"><i><b>Update</b></i></p>    
+</div>
+<h3 style="margin-bottom: 0;">A system for now ... and the future</h3>
+<p style="margin-top: 0; margin-left: 25px;"><span style="font-family: 'Libre Baskerville', serif;">Rosetta</span>&rsquo;s software can be upgraded using an easy mouse click from the Applications menu.  And unlike many annoying systems we had at work, this system will not constantly harrass you to upgrade; and the upgrades will not take many hours to complete.
+
+<p style="margin-top: 0; margin-left: 25px;">We selected vendors for all the components (especially the cabling) which show reliability for being around for a while, and supplying quality parts at reasonable prices.
+
+<h3 style="margin-bottom: 0;">Buy it off-the-shelf</h3>
+<p style="margin-top: 0; margin-left: 25px;">We want <span style="font-family: 'Libre Baskerville', serif; ">Rosetta</span> to be one which can be purchased as a completed system, needing no user design nor development.  Just plug it in and go.
+
+<!-- ####################################################################### -->
+<!-- What Are Some Examples?                                                 -->
+<!-- ####################################################################### -->
+
+<hr class="style1">
+
+<h1 style="margin-bottom: 0;">What are some examples of how it can be used?</h1>
+<p style="margin-top: 0;">Some examples of the way <span style="font-family: 'Libre Baskerville', serif; ">Rosetta</span> can be used include:
+    <ul>
+        <li>Run the rose engine as a typical machine:</li>
+		    <ul>
+        		<li>Spindle by itself,</li>
+		        <li>Rosette phaser/multiplier (RPM) by itself, or</li>
+        		<li>Spindle and RPM together (which can be at different speeds).</li>
+		    </ul>
+
+        <li style="margin-top: 12px;">Index one of the axes of movement:</li>
+		    <ul>
+        		<li>Spindle by itself,</li>
+		        <li>RPM by itself, </li>
+        		<li>Spindle and RPM together,</li>
+        		<li>Any linear axis (X, Z, U, V, or W), or</li>
+        		<li>Any rotary / angular axis (A, B, or C).</li>
+		    </ul>
+
+        <li style="margin-top: 12px; margin-bottom: 12px;">Coordinate the movement of any of the axes, or make other complex movements possible, through the use of gCode (e.g., a software simulation of a geometric chuck).</li>
+    </ul>
+
+<!-- ####################################################################### -->
+<!-- What Is Rosetta not Designed to Do?                          -->
+<!-- ####################################################################### -->
+
+<hr class="style1">
+
+<h1 style="margin-bottom: 0;">What is <span style="font-family: 'Libre Baskerville', serif;">Rosetta</span> not designed to do?</h1>
+<p style="margin-top: 0;"><span style="font-family: 'Libre Baskerville', serif; ">Rosetta</span> is not intended to be used to replace the ornamental turner.  It is not a system built to enable the user can develop a complete design, load it into <span style="font-family: 'Libre Baskerville', serif;">Rosetta</span>, and press <b>GO</b>. 
+
+<p>We believe that workmanship at risk<sup><span style="font-size: 9px;">&#x2460;</span></sup> makes for the most beautiful products.
+
+<p>Certainly, a user could develop a sufficiently complex gCode program which would do all the work for the user, making it work similarly to what is done for 3D printing or a CNC woodworking router.  But even that has risk in the ornamental turning world.  Wood is a natural material, and the opportunity for a problem is ever present.  An operator needs to be managing the process, not leaving it to a computer.
+
+<p>But more importantly, the process of ornamental turning should be fun.  <span style="font-family: 'Libre Baskerville', serif; ">Rosetta</span> is designed to help you with that journey.
+
+<p style="margin-top: 0; margin-bottom: 0; padding-left: 15pt; text-indent: -11px; font: 14px Arial; "><sup>&#x2460;</sup> <i>Workmanship at risk</i> is the idea outlined by David Pye in his book, <i>The Nature and Art of Workmanship</i>.</p>
+
+<!-- ####################################################################### -->
+<!-- Why LinuxCNC                                                            -->
+<!-- ####################################################################### -->
+
+<hr class="style1">
+
+<h1 style="margin-bottom: 0;">Why is LinuxCNC being used?</h1>
+<p style="margin-top: 0px; margin-bottom: 0px;">LinuxCNC ...
+    <ol style="margin-top: 6px; margin-bottom: 0px;">
+        <li style="margin-bottom: 12px;">can be configured to meet the design goals needed for use on a rose engine, without having to develop a set of programs which may be difficult to support later.</li>
+
+        <li style="margin-bottom: 12px;">is powerful enough to handle the design goals.</li>
+        
+        <li style="margin-bottom: 12px;">has been around for many years, having been initially designed by the <a href="https://www.nist.gov" target="new">U.S. National Institue of Standards and Technology</a> in <a href="https://web.archive.org/web/20201208080506/https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir5331.pdf" target="new">1993</a>.  (A complete history of LinuxCNC is online <a href="https://linuxcnc.org/docs/html/common/emc-history.html" target="new">at this web link</a>.) It has a strong user community with good support.  And it continues to be upgraded to provide support needed for new computing hardware.</li>
+        
+        <li style="margin-bottom: 12px;">continues to support the same basic ideas and interfaces, and it does not require the user to re-learn the system each time it is upgraded.</li>
+        
+        <li style="margin-bottom: 12px;">does not have a high license cost to get started, nor a high maintenance cost for contined use.</li>
+    </ol>
+        
+<p>All this provides for a system which can meet the current needs at a reasonable cost, and provide for good long-term support.
+
+<!-- ####################################################################### -->
+<!-- Technology Used                                                         -->
+<!-- ####################################################################### -->
+
+<hr class="style1">
+
+<h1 style="margin-bottom: 0;">What is the underlying technology being used?</h1>
+<p style="margin-top: 0;"><span style="font-family: 'Libre Baskerville', serif; ">Rosetta</span> uses: 
+    <ol>
+        <li style="margin-bottom: 12px;"><a href="https://linuxcnc.org" target="new">LinuxCNC</a>, an open-source system which runs on general purpose computers like a PC or Raspberry Pi.</li>
+
+        <li style="margin-bottom: 12px;">A <a href="https://www.raspberrypi.com" target="new">Raspberry Pi</a> 5 which is a powerful, low cost, general-purpose computer.</li>
+        
+        <li style="margin-bottom: 12px;">Readily available, off-the-shelf parts:
+            <ul>
+                <li>Standard computer monitor</li>
+                <li>Standard computer keyboard</li>
+                <li>Mesa 7i92TH Programmable I/O Card</li>
+                <li>Stepper Online DM542T Stepper Motor Drivers</li>
+            </ul></li>
+            
+        <li>And a custom printed circuit board (PCB), developed to make the wiring of the system easier, faster, and more reliable.</li>
+    </ol>
+
+
+<!-- ####################################################################### -->
+<!-- Footer                                                                  -->
+<!-- ####################################################################### -->
+<div w3-include-html="include-Footer.html"></div> 
+<script>
+includeHTML();
+</script> 
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- ####################################################################### -->
+<!-- #                    RRRRRR    EEEEEEEE  BBBBBBB                      # -->
+<!-- #                    RR   RR   EE        BB    BB                     # -->
+<!-- #                    RR    RR  EE        BB    BB                     # -->
+<!-- #                    RR   RR   EE        BB    BB                     # -->
+<!-- #                    RRRRRR    EEEEEE    BBBBBBB                      # -->
+<!-- #                    RR   RR   EE        BB    BB                     # -->
+<!-- #                    RR    RR  EE        BB    BB                     # -->
+<!-- #                    RR    RR  EE        BB    BB                     # -->
+<!-- #                    RR    RR  EEEEEEEE  BBBBBBB                      # -->
+<!-- # Rosetta                                                             # -->
+<!-- ####################################################################### -->
+<!-- This is the starting file opened.                                       -->
+<!--                                                                         -->
+<!-- File:                                                                   -->
+<!--    index.html                                                           -->
+<!--                                                                         -->
+<!-- Date:                                                                   -->
+<!--    1.0 - 03 Oct 2026, R. Colvin                                         -->
+<!--                                                                         -->
+<!-- Copyright (c) 2026 Colvin Tools and Brainwave Embedded.                 -->
+<!-- ####################################################################### -->
+
+<head bgcolor=#4c535d>
+    <title>Rosetta</title>
+    <link rel="shortcut icon" type="image/ico" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="Images/favicon.png">
+</head>
+
+<body style="font: 16px Arial; ">
+<!-- ####################################################################### -->
+<!-- Code for Including Standard HTML files on the server					 -->
+<!-- ####################################################################### -->
+<script src="library.js"></script>
+
+<script>
+function includeHTML() {
+  var z, i, elmnt, file, xhttp;
+  /* Loop through a collection of all HTML elements: */
+  z = document.getElementsByTagName("*");
+  for (i = 0; i < z.length; i++) {
+    elmnt = z[i];
+    /*search for elements with a certain atrribute:*/
+    file = elmnt.getAttribute("w3-include-html");
+    if (file) {
+      /* Make an HTTP request using the attribute value as the file name: */
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+          if (this.status == 200) {elmnt.innerHTML = this.responseText;}
+          if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
+          /* Remove the attribute, and call this function once more: */
+          elmnt.removeAttribute("w3-include-html");
+          includeHTML();
+        }
+      }
+      xhttp.open("GET", file, true);
+      xhttp.send();
+      /* Exit the function: */
+      return;
+    }
+  }
+}
+</script> 
+
+<!-- ####################################################################### -->
+<!-- Standard horizontal rule definitions		  	                     	 -->
+<div w3-include-html="include-SiteStandards.html"></div> 
+<script>
+includeHTML();
+</script>
+
+<!-- ####################################################################### -->
+<!-- Body 											                         -->
+<!-- ####################################################################### -->
+
+<div style=" Width: 100%; 
+	margin-left: auto; 
+	margin-right: auto;
+	text-align: center;
+	vertical-align: top; 
+	">
+
+    <img src="Bookshelf/Rosetta-01.png" alt="HTML Map"
+	usemap="#html1" 
+    	style=" Width: 1050px; 
+	    margin-left: auto; 
+	    margin-right: auto;
+	    text-align: center;
+	    vertical-align: top; 
+	    ">
+</div>
+
+<!-- area map based on an image size of 1050px wide -->
+<map name = "html1">
+
+<!-- ####################################################################### -->
+<!-- Row 1                                                                   -->
+
+<!-- Rosetta Overview -->
+    <area shape = "rect" coords = "29,215,84,582"
+        href = "https://rosetta.colvintools.com/Rosetta_Overview.html"
+        target = "new"
+    	alt = "OTBoK"
+        />
+<!-- Rosetta User Manual -->
+    <area shape = "rect" coords = "84,159,165,582"
+        href = "https://rosetta.colvintools.com/UserManual"
+        target = "new"
+    	alt = "Rosetta User Manual"
+        />
+<!-- Rosetta gCode Library -->
+    <area shape = "rect" coords = "167,159,248,582"
+        href = "https://rosetta.colvintools.com/Gcode/"
+        target = "new"
+	    alt = "Rosetta gCode Library"
+        />
+<!-- gCode Quick Reference -->
+    <area shape = "rect" coords = "250,159,320,582"
+        href = "https://linuxcnc.org/docs/html/gcode.html"
+        target = "new"
+    	alt = "gCode Quick Reference"
+        />
+        <!-- User Forum -->
+    <area shape = "rect" coords = "322,159,392,582"
+        href = "https://colvintools.com/Rosetta/Forum/index.php"
+        target = "new"
+    	alt = "User Forum"
+        />
+
+<!-- Ornamental Turner's Handy Book -->
+    <area shape = "rect" coords = "469,232,793,277"
+        href = "https://rosetta.colvintools.com/Documents/OTHB.pdf"
+        target = "new"
+    	alt = "Ornamental Turners Handy Book"
+        />
+
+<!-- Sharpening Handbook -->
+    <area shape = "rect" coords = "875,361,950,582"
+        href = "https://sharpeninghandbook.info"
+        target = "new"
+    	alt = "Sharpening Handbook"
+        />
+<!-- OT Book of Knowledge -->
+    <area shape = "rect" coords = "951,161,1021,582"
+        href = "https://OTBoK.info"
+        target = "new"
+    	alt = "OTBoK"
+        />
+
+<!-- Rosetta TV -->
+    <area shape = "rect" coords = "421,306,731,529" 
+        href = "https://www.youtube.com/playlist?list=PL9WeBVI2Iby6HMYFQFcAu5I1L3QOwVCcS" 
+        target = "new"
+    	alt = "Rosetta Videos"
+        />
+
+<!-- ####################################################################### -->
+<!-- Row 2                                                                   -->
+
+<!-- 3D Printed Parts -->
+    <area shape = "rect" coords = "28,676,86,1094"
+        href = "https://mdfre2.colvintools.com/3DPrinting/index.php"
+        target = "new"
+    	alt = "3D Printed Parts"
+        />
+<!-- Colvin Tools -->
+    <area shape = "rect" coords = "87,697,157,1094" 
+        href = "https://www.colvintools.com/" 
+        target = "new"
+    	alt = "Colvin Tools"
+        />
+<!-- Lindow Rose Engine -->
+    <area shape = "rect" coords = "159,697,225,1094" 
+        href = "https://www.LindowRoseEngine.com/" 
+        target = "new"
+    	alt = "Lindow Rose Engine"
+        />
+
+</map>
+
+<!-- ####################################################################### -->
+<!-- Footer                                                                  -->
+<!-- ####################################################################### -->
+<div w3-include-html="include-Footer.html"></div> 
+<script>
+includeHTML();
+</script> 
+</body>
+</html>

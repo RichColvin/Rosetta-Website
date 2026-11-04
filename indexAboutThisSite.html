@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- ####################################################################### -->
+<!-- #                    RRRRRR    EEEEEEEE  BBBBBBB                      # -->
+<!-- #                    RR   RR   EE        BB    BB                     # -->
+<!-- #                    RR    RR  EE        BB    BB                     # -->
+<!-- #                    RR   RR   EE        BB    BB                     # -->
+<!-- #                    RRRRRR    EEEEEE    BBBBBBB                      # -->
+<!-- #                    RR   RR   EE        BB    BB                     # -->
+<!-- #                    RR    RR  EE        BB    BB                     # -->
+<!-- #                    RR    RR  EE        BB    BB                     # -->
+<!-- #                    RR    RR  EEEEEEEE  BBBBBBB                      # -->
+<!-- # Rosetta                                                  # -->
+<!-- ####################################################################### -->
+<!-- # This is a user manual page.										   # -->
+<!--                                                                       # -->
+<!-- File:                                                                 # -->
+<!--    indexAboutThisSite.html                                            # -->
+<!--                                                                       # -->
+<!-- Date:                                                                 # -->
+<!--    1.0 - 17 Aug 2025, R. Colvin                                       # -->
+<!--                                                                       # -->
+<!-- Copyright (c) 2025 Colvin Tools and Brainwave Embedded.               # -->
+<!-- ####################################################################### -->
+
+<head style="background-color: #E6E6E6; ">
+    <title>Rosetta</title>
+    <link rel="shortcut icon" type="image/ico" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="Images/favicon.png">
+</head>
+
+<body style="background-color: #E6E6E6; font: 16px Arial; ">
+
+<script src="library.js"></script>
+
+<script>
+function includeHTML() {
+  var z, i, elmnt, file, xhttp;
+  /* Loop through a collection of all HTML elements: */
+  z = document.getElementsByTagName("*");
+  for (i = 0; i < z.length; i++) {
+    elmnt = z[i];
+    /*search for elements with a certain atrribute:*/
+    file = elmnt.getAttribute("w3-include-html");
+    if (file) {
+      /* Make an HTTP request using the attribute value as the file name: */
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+          if (this.status == 200) {elmnt.innerHTML = this.responseText;}
+          if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
+          /* Remove the attribute, and call this function once more: */
+          elmnt.removeAttribute("w3-include-html");
+          includeHTML();
+        }
+      }
+      xhttp.open("GET", file, true);
+      xhttp.send();
+      /* Exit the function: */
+      return;
+    }
+  }
+}
+</script> 
+
+<!-- ################################################### -->
+<!-- Standard site-wide definitions         	         -->
+<!-- ################################################### -->
+<div w3-include-html="include-SiteStandards.html"></div> 
+<script>
+    includeHTML();
+</script> 
+
+<!-- ################################################### -->
+<!-- Stuff which could not be included                   -->
+<!-- ################################################### -->
+
+<!-- ################################################### -->
+<!-- Header                                              -->
+<!-- ################################################### -->
+<table style=" margin-bottom: 6px;">
+    <tr>
+        <td style="text-align: center; vertical-align: bottom;">
+            <a href="index.html"><IMG SRC="Images/REB%20-%20About%20This%20Site.png" alt="no image file" style="width: 350px;" class="Image"></a>
+        </td>
+    </tr>
+</table>
+
+<hr style="border: 3px solid #191970; margin-top: 0; margin-bottom: 12px; " >
+
+<!-- ################################################### -->
+<!-- Body                                                -->
+<!-- ################################################### -->
+
+<p>This site is intended to help you use the Rosetta system to make some really great things on your ornamental turning machine(s).
+
+<p>We hope you find this system useful and make some really pretty stuff with it.
+
+    <p class="indented">With kindest regards,
+    <br>Rich Colvin &amp; Chuck Peplinski
+
+<!-- ################################################### -->
+<!-- Footer                                              -->
+<!-- ################################################### -->
+<div w3-include-html="include-Footer.html"></div> 
+<script>
+includeHTML();
+</script> 
+</body>
+</html>
