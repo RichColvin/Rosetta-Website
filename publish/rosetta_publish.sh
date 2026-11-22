@@ -1,7 +1,7 @@
 #!/bin/bash
 #######################################################################
 #                                                                     #
-#   Rosetta website: publish from GitHub                              #
+#   Rosetta and Sharpening Handbook websites: publish from GitHub    #
 #                                                                     #
 #######################################################################
 #
@@ -9,26 +9,32 @@
 #   rosetta_publish.sh
 #
 # Purpose:
-#   Keeps rosetta.colvintools.com (GoDaddy, cPanel) in step with
-#   GitHub. Run by a cPanel cron job every 15 minutes. For each repo it
-#   keeps a copy in ~/rosetta_publish/repos/ (outside public_html, so
-#   it's never served), fetches its branch, and when that has changed
-#   copies what the website serves into the site's folder:
+#   Keeps rosetta.colvintools.com and sharpeninghandbook.info (GoDaddy,
+#   cPanel, one account) in step with GitHub. Run by a cPanel cron job
+#   every 15 minutes. For each repo it keeps a copy in
+#   ~/rosetta_publish/repos/ (outside public_html, so it's never
+#   served), fetches its branch, and when that has changed copies what
+#   the website serves:
 #
 #     Rosetta (main)              Rosetta_User_Manual/   -> same name
 #                                 Rosetta_Gcode_Library/ -> same name
+#                                 in public_html/Rosetta/
 #     RosettaSupportManual (main) Rosetta_Support_Manual/ -> same name
-#     Rosetta-Website (main)      every file in the repo, except
-#                                 .gitignore, README and publish/,
-#                                 -> the site's own folder
+#                                 in public_html/Rosetta/
+#     Rosetta-Website (main)      every file in the repo, except those
+#                                 left out (WHOLE_SITES) -> public_html/
+#                                 Rosetta/
+#     Sharpening-Handbook (main)  the same -> public_html/
+#                                 SharpeningHandbook/
 #
 #   A manual folder on the site is made an exact copy of the repo's
-#   (a page removed in GitHub is removed from the site). The site's own
-#   folder is only ever added to: nothing in it is removed, so the
+#   (a page removed in GitHub is removed from the site). A whole site's
+#   folder is only ever added to, and only files whose contents changed
+#   are copied: nothing in it is removed, so on the Rosetta site the
 #   Forum, Support/ (the version-report scripts and their data - never
 #   touch them), the redirect-only UserManual/ and Gcode/ folders and
-#   the manual folders are left alone. Names in PROTECTED are never
-#   written by the Rosetta-Website copy even if that repo has them.
+#   the manual folders are left alone. A site's protected names are
+#   never written even if its repo has them.
 #
 #   Edit pages in GitHub, not in cPanel's File Manager: a hand edit in
 #   a published folder is overwritten at the next change.
@@ -38,7 +44,7 @@
 #   bash rosetta_publish.sh --force     publish everything again
 #   bash rosetta_publish.sh --dry-run   say what would be copied, change
 #                                       nothing on the site
-#   --site DIR / --work DIR             another site folder / work
+#   --public DIR / --work DIR           another public_html / work
 #                                       folder (for testing)
 #
 # Log:
@@ -48,27 +54,31 @@
 #   1.0 - 22 November 2026
 #   1.1 - 22 November 2026 - the website's file list through a file, not
 #         process substitution (copied 0 files on GoDaddy); errors logged
+#   1.2 - 22 November 2026 - the Sharpening Handbook too (WHOLE_SITES);
+#         a whole site copies only the files that changed
 #
 # Copyright (c) 2026 Colvin Tools and Brainwave Embedded.
 #######################################################################
 
-SITE="$HOME/public_html/Rosetta"
+PUBLIC="$HOME/public_html"
 WORK="$HOME/rosetta_publish"
 GITHUB="https://github.com/RichColvin"
 
-# repo  branch  folder in the repo (copied to the same name on the site)
+# repo  branch  folder in the repo (copied to the same name in
+# public_html/Rosetta/)
 MANUALS="
 Rosetta              main Rosetta_User_Manual
 Rosetta              main Rosetta_Gcode_Library
 RosettaSupportManual main Rosetta_Support_Manual
 "
-WEBSITE_REPO="Rosetta-Website"
-WEBSITE_BRANCH="main"
 
-# Never written by the Rosetta-Website copy.
-PROTECTED="Support Forum UserManual Gcode Rosetta_User_Manual
-Rosetta_Gcode_Library Rosetta_Support_Manual cgi-bin .well-known
-.htaccess publish"
+# Whole sites, one per line:
+#   repo | branch | folder in public_html | left out (patterns, ";"
+#   between) | protected (top-level names never written, spaces between)
+WHOLE_SITES="
+Rosetta-Website|main|Rosetta|.gitignore;README*;LICENSE;publish/*;*.DS_Store|Support Forum UserManual Gcode Rosetta_User_Manual Rosetta_Gcode_Library Rosetta_Support_Manual cgi-bin .well-known .htaccess publish
+Sharpening-Handbook|main|SharpeningHandbook|.gitignore;README*;LICENSE;book-build/*;_Web Site Documents/*;*.DS_Store|cgi-bin .well-known .htaccess
+"
 
 FORCE=0
 DRY_RUN=0
@@ -76,7 +86,7 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --force)   FORCE=1 ;;
         --dry-run) DRY_RUN=1 ;;
-        --site)    SITE="$2"; shift ;;
+        --public)  PUBLIC="$2"; shift ;;
         --work)    WORK="$2"; shift ;;
         *) echo "Unknown option: $1" >&2; exit 2 ;;
     esac
@@ -120,6 +130,7 @@ GIT="$(command -v git || echo /usr/local/cpanel/3rdparty/bin/git)"
 if [ ! -x "$GIT" ]; then
     log "ERROR: git not found."; exit 1
 fi
+SITE="$PUBLIC/Rosetta"
 if [ ! -d "$SITE" ]; then
     log "ERROR: the site folder $SITE isn't there - nothing published."; exit 1
 fi
@@ -169,10 +180,24 @@ mirror() {
     fi
 }
 
+# is_protected FILE "NAMES"
 is_protected() {
     local top="${1%%/*}" p
-    for p in $PROTECTED; do
+    for p in $2; do
         [ "$top" = "$p" ] && return 0
+    done
+    return 1
+}
+
+# is_left_out FILE "PATTERN;PATTERN..."
+is_left_out() {
+    local f="$1" p rest="$2;"
+    while [ -n "$rest" ]; do
+        p="${rest%%;*}"; rest="${rest#*;}"
+        [ -n "$p" ] || continue
+        # shellcheck disable=SC2053
+        [[ "$f" == $p ]] && return 0
+        [[ "${f##*/}" == $p ]] && return 0
     done
     return 1
 }
@@ -204,38 +229,54 @@ echo "$MANUALS" | while read -r repo branch folder; do
     fi
 done
 
-# The website's own pages
-commit="$(fetch "$WEBSITE_REPO" "$WEBSITE_BRANCH")"
-if [ -z "$commit" ]; then
-    log "ERROR: couldn't fetch $WEBSITE_REPO ($WEBSITE_BRANCH) - its pages not published."
-    echo fail >> "$WORK/lock/failed"
-elif changed website "$commit"; then
-    src="$REPOS/$WEBSITE_REPO"
-    count=0; skipped=""
+# Whole sites (the Rosetta site's own pages, the Sharpening Handbook)
+echo "$WHOLE_SITES" > "$WORK/lock/sites"
+while IFS='|' read -r repo branch folder leave_out protected; do
+    [ -z "$repo" ] && continue
+    target="$PUBLIC/$folder"
+    if [ ! -d "$target" ]; then
+        log "ERROR: $target isn't there - $repo not published."
+        echo fail >> "$WORK/lock/failed"; continue
+    fi
+    commit="$(fetch "$repo" "$branch")"
+    if [ -z "$commit" ]; then
+        log "ERROR: couldn't fetch $repo ($branch) - not published."
+        echo fail >> "$WORK/lock/failed"; continue
+    fi
+    key="site-$repo"
+    changed "$key" "$commit" || continue
+    src="$REPOS/$repo"
+    copied=0; same=0; skipped=""
     # (a file, not "< <(...)": process substitution can fail silently
     # in GoDaddy's locked-down cron environment)
-    "$GIT" -C "$src" ls-files -z > "$WORK/lock/files" || {
-        log "ERROR: couldn't list $WEBSITE_REPO's files."; echo fail >> "$WORK/lock/failed"; }
+    if ! "$GIT" -C "$src" ls-files -z > "$WORK/lock/files"; then
+        log "ERROR: couldn't list $repo's files."; echo fail >> "$WORK/lock/failed"; continue
+    fi
+    failed=0
     while IFS= read -r -d '' f; do
-        case "$f" in
-            .gitignore|README*|publish/*) continue ;;
-        esac
-        if is_protected "$f"; then
+        is_left_out "$f" "$leave_out" && continue
+        if is_protected "$f" "$protected"; then
             skipped="$skipped ${f%%/*}"; continue
         fi
-        count=$((count + 1))
+        if cmp -s "$src/$f" "$target/$f"; then
+            same=$((same + 1)); continue
+        fi
+        copied=$((copied + 1))
         [ "$DRY_RUN" = 1 ] && continue
-        mkdir -p "$SITE/$(dirname "$f")" && cp -p "$src/$f" "$SITE/$f" || {
-            log "ERROR: couldn't copy $f."; echo fail >> "$WORK/lock/failed"; }
+        mkdir -p "$target/$(dirname "$f")" && cp -p "$src/$f" "$target/$f" || {
+            log "ERROR: couldn't copy $f."; failed=1; }
     done < "$WORK/lock/files"
-    [ -n "$skipped" ] && log "  left alone (protected):$(echo $skipped | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+    [ -n "$skipped" ] && log "  $repo - left alone (protected):$(echo $skipped | tr ' ' '\n' | sort -u | tr '\n' ' ')"
     if [ "$DRY_RUN" = 1 ]; then
-        log "  would copy $count files from $WEBSITE_REPO into $SITE (adding/replacing only)"
+        log "  would copy $copied changed files from $repo into $target ($same already the same; adding/replacing only)"
+    elif [ "$failed" = 1 ]; then
+        echo fail >> "$WORK/lock/failed"
+        log "ERROR: $repo only partly published ($copied files tried) - tried again next run."
     else
-        mark website "$commit"
-        log "Published $count website files from $WEBSITE_REPO $WEBSITE_BRANCH ${commit:0:7}."
+        mark "$key" "$commit"
+        log "Published $repo $branch ${commit:0:7}: $copied changed files copied, $same already the same."
     fi
-fi
+done < "$WORK/lock/sites"
 
 [ -f "$WORK/lock/failed" ] && { rm -f "$WORK/lock/failed"; exit 1; }
 exit 0
