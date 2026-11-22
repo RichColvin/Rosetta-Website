@@ -46,6 +46,8 @@
 #
 # Version
 #   1.0 - 22 November 2026
+#   1.1 - 22 November 2026 - the website's file list through a file, not
+#         process substitution (copied 0 files on GoDaddy); errors logged
 #
 # Copyright (c) 2026 Colvin Tools and Brainwave Embedded.
 #######################################################################
@@ -85,6 +87,9 @@ REPOS="$WORK/repos"
 STATE="$WORK/state"
 LOG="$WORK/publish.log"
 mkdir -p "$REPOS" "$STATE" || exit 1
+# anything the script itself complains about goes in the log too (cron
+# throws its output away)
+exec 2>>"$LOG"
 
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "$LOG"
@@ -92,7 +97,7 @@ log() {
 }
 
 finish() {
-    rmdir "$WORK/lock" 2>/dev/null
+    rm -rf "$WORK/lock"
     # keep the log short
     if [ -f "$LOG" ] && [ "$(wc -l < "$LOG")" -gt 1000 ]; then
         tail -n 1000 "$LOG" > "$LOG.tmp" && mv "$LOG.tmp" "$LOG"
@@ -103,7 +108,7 @@ finish() {
 if ! mkdir "$WORK/lock" 2>/dev/null; then
     # a lock older than an hour is left from a run that was killed
     if [ -n "$(find "$WORK/lock" -maxdepth 0 -mmin +60 2>/dev/null)" ]; then
-        rmdir "$WORK/lock"; mkdir "$WORK/lock" || exit 1
+        rm -rf "$WORK/lock"; mkdir "$WORK/lock" || exit 1
         log "Removed a lock left by an earlier run."
     else
         exit 0
@@ -207,6 +212,10 @@ if [ -z "$commit" ]; then
 elif changed website "$commit"; then
     src="$REPOS/$WEBSITE_REPO"
     count=0; skipped=""
+    # (a file, not "< <(...)": process substitution can fail silently
+    # in GoDaddy's locked-down cron environment)
+    "$GIT" -C "$src" ls-files -z > "$WORK/lock/files" || {
+        log "ERROR: couldn't list $WEBSITE_REPO's files."; echo fail >> "$WORK/lock/failed"; }
     while IFS= read -r -d '' f; do
         case "$f" in
             .gitignore|README*|publish/*) continue ;;
@@ -218,7 +227,7 @@ elif changed website "$commit"; then
         [ "$DRY_RUN" = 1 ] && continue
         mkdir -p "$SITE/$(dirname "$f")" && cp -p "$src/$f" "$SITE/$f" || {
             log "ERROR: couldn't copy $f."; echo fail >> "$WORK/lock/failed"; }
-    done < <("$GIT" -C "$src" ls-files -z)
+    done < "$WORK/lock/files"
     [ -n "$skipped" ] && log "  left alone (protected):$(echo $skipped | tr ' ' '\n' | sort -u | tr '\n' ' ')"
     if [ "$DRY_RUN" = 1 ]; then
         log "  would copy $count files from $WEBSITE_REPO into $SITE (adding/replacing only)"
