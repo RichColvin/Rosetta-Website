@@ -1,8 +1,8 @@
 #!/bin/bash
 #######################################################################
 #                                                                     #
-#   Rosetta, Sharpening Handbook and BKBoK websites: publish from     #
-#   GitHub                                                            #
+#   Rosetta, Sharpening Handbook, BKBoK and Colvin Gardens websites:  #
+#   publish from GitHub                                               #
 #                                                                     #
 #######################################################################
 #
@@ -10,8 +10,9 @@
 #   rosetta_publish.sh
 #
 # Purpose:
-#   Keeps rosetta.colvintools.com, sharpeninghandbook.info and
-#   bkbok.info (GoDaddy, cPanel, one account) in step with GitHub. Run by a cPanel cron job
+#   Keeps rosetta.colvintools.com, sharpeninghandbook.info, bkbok.info
+#   and colvingardens.info (GoDaddy, cPanel, one account) in step with
+#   GitHub. Run by a cPanel cron job
 #   every 15 minutes. For each repo it keeps a copy in
 #   ~/rosetta_publish/repos/ (outside public_html, so it's never
 #   served), fetches its branch, and when that has changed copies what
@@ -28,6 +29,8 @@
 #     Sharpening-Handbook (main)  the same -> public_html/
 #                                 SharpeningHandbook/
 #     BKBoK (main)                the same -> public_html/BKBoK/
+#     ColvinGardens (main)        the same -> public_html/
+#                                 ColvinGardens/
 #
 #   A manual folder on the site is made an exact copy of the repo's
 #   (a page removed in GitHub is removed from the site). A whole site's
@@ -59,6 +62,7 @@
 #   1.2 - 22 November 2026 - the Sharpening Handbook too (WHOLE_SITES);
 #         a whole site copies only the files that changed
 #   1.3 - 23 November 2026 - BKBoK too (WHOLE_SITES)
+#   1.4 - 23 November 2026 - Colvin Gardens too (WHOLE_SITES)
 #
 # Copyright (c) 2026 Colvin Tools and Brainwave Embedded.
 #######################################################################
@@ -82,6 +86,7 @@ WHOLE_SITES="
 Rosetta-Website|main|Rosetta|.gitignore;README*;LICENSE;publish/*;*.DS_Store|Support Forum UserManual Gcode Rosetta_User_Manual Rosetta_Gcode_Library Rosetta_Support_Manual cgi-bin .well-known .htaccess publish
 Sharpening-Handbook|main|SharpeningHandbook|.gitignore;README*;LICENSE;book-build/*;_Web Site Documents/*;*.DS_Store|cgi-bin .well-known .htaccess
 BKBoK|main|BKBoK|.gitignore;README*;LICENSE;tools/*;*.DS_Store|cgi-bin .well-known .htaccess
+ColvinGardens|main|ColvinGardens|.gitignore;README*;LICENSE;tools/*;*.DS_Store|cgi-bin .well-known .htaccess
 "
 
 FORCE=0
