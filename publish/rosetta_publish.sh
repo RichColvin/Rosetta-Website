@@ -1,8 +1,8 @@
 #!/bin/bash
 #######################################################################
 #                                                                     #
-#   Rosetta, Sharpening Handbook, BKBoK and Colvin Gardens websites:  #
-#   publish from GitHub                                               #
+#   Colvin Tools, Rosetta, Sharpening Handbook, BKBoK and Colvin      #
+#   Gardens websites: publish from GitHub                             #
 #                                                                     #
 #######################################################################
 #
@@ -10,10 +10,10 @@
 #   rosetta_publish.sh
 #
 # Purpose:
-#   Keeps rosetta.colvintools.com, sharpeninghandbook.info, bkbok.info
-#   and colvingardens.info (GoDaddy, cPanel, one account) in step with
-#   GitHub. Run by a cPanel cron job
-#   every 15 minutes. For each repo it keeps a copy in
+#   Keeps colvintools.com, rosetta.colvintools.com,
+#   sharpeninghandbook.info, bkbok.info and colvingardens.info
+#   (GoDaddy, cPanel, one account) in step with GitHub. Run by a cPanel
+#   cron job every 15 minutes. For each repo it keeps a copy in
 #   ~/rosetta_publish/repos/ (outside public_html, so it's never
 #   served), fetches its branch, and when that has changed copies what
 #   the website serves:
@@ -31,6 +31,14 @@
 #     BKBoK (main)                the same -> public_html/BKBoK/
 #     ColvinGardens (main)        the same -> public_html/
 #                                 ColvinGardens/
+#     ColvinTools (main)          the same -> public_html/ itself
+#                                 (colvintools.com is the account's
+#                                 main domain), never writing into the
+#                                 other sites' folders
+#
+#   A whole site's repo may hold a .publishignore: files in the repo
+#   that are never put on the site, one pattern per line (a file name,
+#   a path, or * and ? wildcards), "#" lines being notes.
 #
 #   A manual folder on the site is made an exact copy of the repo's
 #   (a page removed in GitHub is removed from the site). A whole site's
@@ -48,7 +56,11 @@
 #   bash rosetta_publish.sh             publish what has changed
 #   bash rosetta_publish.sh --force     publish everything again
 #   bash rosetta_publish.sh --dry-run   say what would be copied, change
-#                                       nothing on the site
+#                                       nothing on the site (each file
+#                                       a whole site would add or
+#                                       replace is listed in
+#                                       ~/rosetta_publish/dry-run-<repo>
+#                                       .txt)
 #   --public DIR / --work DIR           another public_html / work
 #                                       folder (for testing)
 #
@@ -63,6 +75,10 @@
 #         a whole site copies only the files that changed
 #   1.3 - 23 November 2026 - BKBoK too (WHOLE_SITES)
 #   1.4 - 23 November 2026 - Colvin Gardens too (WHOLE_SITES)
+#   1.5 - 27 November 2026 - Colvin Tools too, into public_html itself
+#         (folder "."); --dry-run lists each file it would add or
+#         replace in dry-run-<repo>.txt; a repo's .publishignore
+#         leaves out more of its files
 #
 # Copyright (c) 2026 Colvin Tools and Brainwave Embedded.
 #######################################################################
@@ -80,13 +96,15 @@ RosettaSupportManual main Rosetta_Support_Manual
 "
 
 # Whole sites, one per line:
-#   repo | branch | folder in public_html | left out (patterns, ";"
-#   between) | protected (top-level names never written, spaces between)
+#   repo | branch | folder in public_html ("." = public_html itself) |
+#   left out (patterns, ";" between) | protected (top-level names never
+#   written, spaces between)
 WHOLE_SITES="
 Rosetta-Website|main|Rosetta|.gitignore;README*;LICENSE;publish/*;*.DS_Store|Support Forum UserManual Gcode Rosetta_User_Manual Rosetta_Gcode_Library Rosetta_Support_Manual cgi-bin .well-known .htaccess publish
 Sharpening-Handbook|main|SharpeningHandbook|.gitignore;README*;LICENSE;book-build/*;_Web Site Documents/*;*.DS_Store|cgi-bin .well-known .htaccess
 BKBoK|main|BKBoK|.gitignore;README*;LICENSE;tools/*;*.DS_Store|cgi-bin .well-known .htaccess
 ColvinGardens|main|ColvinGardens|.gitignore;README*;LICENSE;tools/*;*.DS_Store|cgi-bin .well-known .htaccess
+ColvinTools|main|.|.gitignore;README*;LICENSE;*.DS_Store;*.xcf|Rosetta SharpeningHandbook BKBoK ColvinGardens cgi-bin .well-known .htaccess
 "
 
 FORCE=0
@@ -242,7 +260,7 @@ done
 echo "$WHOLE_SITES" > "$WORK/lock/sites"
 while IFS='|' read -r repo branch folder leave_out protected; do
     [ -z "$repo" ] && continue
-    target="$PUBLIC/$folder"
+    if [ "$folder" = "." ]; then target="$PUBLIC"; else target="$PUBLIC/$folder"; fi
     if [ ! -d "$target" ]; then
         log "ERROR: $target isn't there - $repo not published."
         echo fail >> "$WORK/lock/failed"; continue
@@ -256,14 +274,25 @@ while IFS='|' read -r repo branch folder leave_out protected; do
     changed "$key" "$commit" || continue
     src="$REPOS/$repo"
     copied=0; same=0; skipped=""
+    [ "$DRY_RUN" = 1 ] && rm -f "$WORK/dry-run-$repo.txt"
     # (a file, not "< <(...)": process substitution can fail silently
     # in GoDaddy's locked-down cron environment)
     if ! "$GIT" -C "$src" ls-files -z > "$WORK/lock/files"; then
         log "ERROR: couldn't list $repo's files."; echo fail >> "$WORK/lock/failed"; continue
     fi
     failed=0
+    # the repo's own .publishignore adds to what's left out: one pattern
+    # per line (matched like the ones above), "#" lines are notes
+    leave_out_here="$leave_out;.publishignore"
+    if [ -f "$src/.publishignore" ]; then
+        while IFS= read -r p || [ -n "$p" ]; do
+            p="${p%$'\r'}"
+            case "$p" in ''|'#'*) continue ;; esac
+            leave_out_here="$leave_out_here;$p"
+        done < "$src/.publishignore"
+    fi
     while IFS= read -r -d '' f; do
-        is_left_out "$f" "$leave_out" && continue
+        is_left_out "$f" "$leave_out_here" && continue
         if is_protected "$f" "$protected"; then
             skipped="$skipped ${f%%/*}"; continue
         fi
@@ -271,13 +300,17 @@ while IFS='|' read -r repo branch folder leave_out protected; do
             same=$((same + 1)); continue
         fi
         copied=$((copied + 1))
-        [ "$DRY_RUN" = 1 ] && continue
+        if [ "$DRY_RUN" = 1 ]; then
+            if [ -e "$target/$f" ]; then echo "replace $f"; else echo "add     $f"; fi >> "$WORK/dry-run-$repo.txt"
+            continue
+        fi
         mkdir -p "$target/$(dirname "$f")" && cp -p "$src/$f" "$target/$f" || {
             log "ERROR: couldn't copy $f."; failed=1; }
     done < "$WORK/lock/files"
     [ -n "$skipped" ] && log "  $repo - left alone (protected):$(echo $skipped | tr ' ' '\n' | sort -u | tr '\n' ' ')"
     if [ "$DRY_RUN" = 1 ]; then
         log "  would copy $copied changed files from $repo into $target ($same already the same; adding/replacing only)"
+        [ "$copied" -gt 0 ] && log "  (each one listed in $WORK/dry-run-$repo.txt)"
     elif [ "$failed" = 1 ]; then
         echo fail >> "$WORK/lock/failed"
         log "ERROR: $repo only partly published ($copied files tried) - tried again next run."
